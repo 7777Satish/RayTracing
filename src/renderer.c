@@ -7,6 +7,7 @@ int innerWidth = 1000;
 int innerHeight = 500;
 float screenDistance = 0.5;
 float FOV = 90;
+int NUMBER_OF_THREADS = 15;
 
 Camera camera = {
     .pos = {0, 3, -2},
@@ -21,6 +22,8 @@ Light light = {
 
 #define MAX_VERTICES 1000
 #define MAX_LINE_LEN 256
+
+Vector3 pixelBuffer[500][1000];
 
 void init(){
     srand(time(NULL));
@@ -84,27 +87,34 @@ void init(){
 void renderBG(){
     for(int j=0; j<innerHeight; j++){
         int blue = (j+0.0)/innerHeight * 120 + 100;
-        SDL_SetRenderDrawColor(renderer, blue-30, blue-30, 225, 255);
-        SDL_Rect r = {0, j, innerWidth, 1};
-        SDL_RenderFillRect(renderer, &r);
+        // SDL_SetRenderDrawColor(renderer, blue-30, blue-30, 225, 255);
+        // SDL_Rect r = {0, j, innerWidth, 1};
+        // SDL_RenderFillRect(renderer, &r);
+
+        for(int i=0; i<innerWidth; i++){
+            pixelBuffer[j][i] = (Vector3){blue-30, blue-30, 255};
+        }
     }
 }
 
-void render(){
-    renderBG();
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+void* renderMpixels(void* arg){
+    int n = *((int*)arg);
+
+    int area = innerWidth * innerHeight;
+    int noOfPixelsPerThread = area/NUMBER_OF_THREADS;
 
     float aspect = (float)innerWidth / innerHeight;
     float scale = tanf((FOV * 0.5f) * 3.1415 / 180.0f);
 
-    
+    int start = n * noOfPixelsPerThread;
+    int end = (n == NUMBER_OF_THREADS - 1) ? area : (n + 1) * noOfPixelsPerThread;
 
-    for (int i = 0; i < innerWidth; i++) {
-        for (int j = 0; j < innerHeight; j++) {
-            float u = (2 * ((i + 0.5f) / innerWidth) - 1) * scale;
-            float v = (1 - 2 * ((j + 0.5f) / innerHeight)) * (scale / aspect);
+    for(int i = start; i < end; i++){
+        int x = i%innerWidth;
+        int y = i/innerWidth;
 
-            // Vector3 ray = norm((Vector3){u, v, 1});
+        float u = (2 * ((x + 0.5f) / innerWidth) - 1) * scale;
+            float v = (1 - 2 * ((y + 0.5f) / innerHeight)) * (scale / aspect);
 
             Vector3 forward = norm(camera.dir);
             Vector3 right   = norm(cross((Vector3){0, 1, 0}, forward));
@@ -118,11 +128,43 @@ void render(){
             
             Vector3 color = trace(camera.pos, ray, 1);
             if(color.x != -1 && !(color.x==0 && color.y==0 && color.z==0)){
-                SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
+                // SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
     
-                SDL_RenderDrawPoint(renderer, i, j);
+                pixelBuffer[y][x] = color;
+                // SDL_RenderDrawPoint(renderer, x, y);
             }
         
+    }
+
+    pthread_exit(NULL);
+}
+
+void render(){
+    renderBG();
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+
+    pthread_t threads[NUMBER_OF_THREADS];
+    int thread_ids[NUMBER_OF_THREADS];
+
+    for(int i = 0; i<NUMBER_OF_THREADS; i++){
+        thread_ids[i] = i;
+        int result = pthread_create(&threads[i], NULL, renderMpixels, (void*)(&thread_ids[i]));
+        if (result != 0) {
+            fprintf(stderr, "Error creating thread %d\n", i);
+            return;
+        }
+    }
+
+    for(int i = 0; i<NUMBER_OF_THREADS; i++){
+        pthread_join(threads[i], NULL);
+    }
+
+    
+    for(int j = 0; j<innerHeight; j++){
+        for(int i = 0; i<innerWidth; i++){
+            Vector3 color = pixelBuffer[j][i];
+            SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
+            SDL_RenderDrawPoint(renderer, i, j);
         }
     }
 }
