@@ -24,6 +24,10 @@ Vector3 multiply(Vector3 a, float b) {
     return result;
 }
 
+Vector3 multiplyVec(Vector3 a, Vector3 b){
+    return (Vector3){a.x*b.x, a.y*b.y, a.z*b.z};
+}
+
 Vector3 divide(Vector3 a, float b) {
     if(b==0) return a;
     Vector3 result;

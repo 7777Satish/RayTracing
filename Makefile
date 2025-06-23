@@ -1,7 +1,7 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -Wextra -Iinclude
-LDFLAGS = -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm
+LDFLAGS = -pthread -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -lm
 
 # Directories
 SRC_DIR = src

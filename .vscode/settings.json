@@ -5,6 +5,7 @@
         "sdl_ttf.h": "c",
         "sdl_image.h": "c",
         "sdl.h": "c",
-        "utils.h": "c"
+        "utils.h": "c",
+        "cstdlib": "cpp"
     }
 }

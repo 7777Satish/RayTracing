@@ -3,8 +3,26 @@
 
 #include "renderer.h"
 #include <stdlib.h>
+#include <math.h>
 #include <stdio.h>
 #include "vector.h"
+
+
+typedef struct Sphere{
+    Vector3 pos;
+    Vector3 color;
+    float r;
+    float reflectivity;
+    float smoothness;
+} Sphere;
+
+typedef struct Triangle{
+    Vector3 v1;
+    Vector3 v2;
+    Vector3 v3;
+    Vector3 color;
+} Triangle;
+
 
 typedef struct Shape{
     Sphere sphere;
@@ -22,7 +40,8 @@ typedef enum {
 
 extern Shape* shapes;
 
-void createSphere(Vector3 pos, float r, Vector3 color);
+float randomFloat();
+void createSphere(Vector3 pos, float r, Vector3 color, float reflectivity, float smoothness);
 void createTriangle(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 color);
 
 #endif

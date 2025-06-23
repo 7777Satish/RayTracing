@@ -2,12 +2,19 @@
 
 Shape* shapes = NULL;
 
+#include <stdlib.h>
 
-void createSphere(Vector3 pos, float r, Vector3 color) {
+float randomFloat() {
+    return (float)rand() / (float)RAND_MAX;
+}
+
+void createSphere(Vector3 pos, float r, Vector3 color, float reflectivity, float smoothness) {
     Sphere s = {
         .pos = pos,
         .color = color,
-        .r = r
+        .r = r,
+        .reflectivity = reflectivity,
+        .smoothness = smoothness
     };
 
     Shape* node = (Shape*)malloc(sizeof(Shape));
@@ -28,7 +35,7 @@ void createTriangle(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 color){
     Triangle t = {
         .v1 = v1,
         .v2 = v2,
-        .v3 = v2,
+        .v3 = v3,
         .color = color
     };
 
