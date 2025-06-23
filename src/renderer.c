@@ -109,30 +109,49 @@ void* renderMpixels(void* arg){
     int start = n * noOfPixelsPerThread;
     int end = (n == NUMBER_OF_THREADS - 1) ? area : (n + 1) * noOfPixelsPerThread;
 
+    float pixelWidth = 1.0 / innerWidth;
+    float pixelHeight = 1.0 / innerHeight;
+
     for(int i = start; i < end; i++){
         int x = i%innerWidth;
         int y = i/innerWidth;
 
         float u = (2 * ((x + 0.5f) / innerWidth) - 1) * scale;
-            float v = (1 - 2 * ((y + 0.5f) / innerHeight)) * (scale / aspect);
+        float v = (1 - 2 * ((y + 0.5f) / innerHeight)) * (scale / aspect);
 
-            Vector3 forward = norm(camera.dir);
-            Vector3 right   = norm(cross((Vector3){0, 1, 0}, forward));
-            Vector3 up      = cross(forward, right);
+        Vector3 forward = norm(camera.dir);
+        Vector3 right   = norm(cross((Vector3){0, 1, 0}, forward));
+        Vector3 up      = cross(forward, right);
+
+        float offsets[4][2] = {
+            { -0.25f, -0.25f },
+            {  0.25f, -0.25f },
+            { -0.25f,  0.25f },
+            {  0.25f,  0.25f },
+        };
+
+        Vector3 color = {0, 0, 0};
+
+        for (int k = 0; k < 4; k++) {
+            float du = u + offsets[k][0] * pixelWidth;
+            float dv = v + offsets[k][1] * pixelHeight;
 
             Vector3 ray = norm(add(add(
-                multiply(right, u),
-                multiply(up, v)
-            ),
-            forward));
-            
-            Vector3 color = trace(camera.pos, ray, 1);
-            if(color.x != -1 && !(color.x==0 && color.y==0 && color.z==0)){
-                // SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
-    
-                pixelBuffer[y][x] = color;
-                // SDL_RenderDrawPoint(renderer, x, y);
-            }
+                multiply(right, du),
+                multiply(up, dv)
+            ), forward));
+
+            color = add(color, trace(camera.pos, ray, 1));
+        }
+
+        color = divide(color, 4); // average of 4 samples
+
+        if(color.x != -1 && !(color.x==0 && color.y==0 && color.z==0)){
+            // SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
+
+            pixelBuffer[y][x] = color;
+            // SDL_RenderDrawPoint(renderer, x, y);
+        }
         
     }
 
