@@ -43,5 +43,6 @@ extern Shape* shapes;
 float randomFloat();
 void createSphere(Vector3 pos, float r, Vector3 color, float reflectivity, float smoothness);
 void createTriangle(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 color);
+void createTree(Vector3 pos, float r, float height, int n);
 
 #endif

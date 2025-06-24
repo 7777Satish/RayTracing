@@ -49,6 +49,6 @@ void render();
 Vector3 trace(Vector3 pos, Vector3 dir, int iteration);
 int rayIntersectsTriangle(Vector3 pos, Vector3 dir,
                            Vector3 v0, Vector3 v1, Vector3 v2,
-                           float* t_out);
+                           float* lambda);
 
 #endif
