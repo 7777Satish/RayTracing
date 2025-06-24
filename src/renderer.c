@@ -147,7 +147,7 @@ void* renderMpixels(void* arg){
 
         Vector3 color = {0, 0, 0};
 
-        for (int k = 0; k < 1; k++) {
+        for (int k = 0; k < 4; k++) {
             float du = u + offsets[k][0] * pixelWidth;
             float dv = v + offsets[k][1] * pixelHeight;
 
@@ -159,7 +159,7 @@ void* renderMpixels(void* arg){
             color = add(color, trace(camera.pos, ray, 1));
         }
 
-        color = divide(color, 1); // average of 4 samples
+        color = divide(color, 4); // average of 4 samples
 
         if(color.x != -1 && !(color.x==0 && color.y==0 && color.z==0)){
             // SDL_SetRenderDrawColor(renderer, color.x, color.y, color.z, 255);
